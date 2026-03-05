@@ -1,0 +1,41 @@
+using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
+using PDHours.API.DependencyInjection;
+using PDHours.Infra.Data.Database.Context;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers();
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+//Adciona as dependências do projeto (Costumo deixar na pasta Config)
+builder.Services.AddProjectServices(builder.Configuration);
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddOData(options => options.Select()
+                                            .Filter()
+                                            .OrderBy()
+                                            .Count()
+                                            .Expand());
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
