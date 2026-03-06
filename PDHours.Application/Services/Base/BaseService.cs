@@ -1,10 +1,5 @@
 ﻿using PDHours.Application.Interfaces.IRepositories.Base;
 using PDHours.Application.Interfaces.IServices.Base;
-using PDHours.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace PDHours.Application.Services.Base
 {
     public abstract class BaseService<T> : IBaseService<T>
