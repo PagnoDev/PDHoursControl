@@ -17,6 +17,20 @@ namespace PDHours.API.Controllers
             _service = service;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllReports()
+        {
+            try
+            {
+                var reports = await _service.GetAll();
+                return Ok(reports);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateReport([FromBody] CreateReportDTO reportDTO)
         {

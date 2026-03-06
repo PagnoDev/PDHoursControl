@@ -12,7 +12,6 @@ namespace PDHours.Domain.Models
         public int SpentHours { get; set; }
         public DateTime Created_At { get; set; }
 
-        [JsonIgnore]
         public EmployeeModel? Employee { get; set; }
     }
 }

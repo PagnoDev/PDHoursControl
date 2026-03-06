@@ -32,7 +32,7 @@ namespace PDHours.Infra.Data.Repositories
         public async Task<List<TotalHoursByEmployeeDTO>> GetHourByMember(int id, DateTime? startDate = null, DateTime? endDate = null)
         {
             DateTime? startDateUtc = startDate.HasValue ? DateTime.SpecifyKind(startDate.Value.Date, DateTimeKind.Utc) : (DateTime?)null;
-            DateTime? endDateUtcExclusive = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value.Date.AddDays(1), DateTimeKind.Utc) : (DateTime?)null;
+            DateTime? endDateUtcExclusive = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value.Date.AddHours(24), DateTimeKind.Utc) : (DateTime?)null;
 
             List<TotalHoursByEmployeeDTO> data = await _db.Employees
                 .Where(e => e.SquadId == id)
