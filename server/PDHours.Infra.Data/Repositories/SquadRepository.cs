@@ -11,12 +11,7 @@ namespace PDHours.Infra.Data.Repositories
 {
     public class SquadRepository : Repository<SquadModel>, ISquadRepository
     {
-        private readonly ILogger<SquadRepository> _logger;
-
-        public SquadRepository(DataContext db, ILogger<SquadRepository> logger) : base(db)
-        {
-            _logger = logger;
-        }
+        public SquadRepository(DataContext db) : base(db) { }
 
         public override SquadModel? GetById(int id) => _db?.Set<SquadModel>()?.Include(s => s.Employees).FirstOrDefault(s => s.Id == id);
 

@@ -75,6 +75,23 @@ namespace PDHours.API.Controllers
             return Ok(data);
         }
 
+        [HttpGet("MemberReportsTotalHours")]
+        public async Task<IActionResult> GetMemberReportsTotalHours(int id)
+        {
+            SquadModel? squad = await _service.GetById(id);
+
+            if (squad == null)
+                return NotFound(new { message = $"Squad com ID {id} não encontrada" });
+
+            int totalHours = await _service.GetTotalHours(id);
+
+            return Ok(new
+            {
+                SquadId = id,
+                TotalHours = totalHours
+            });
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateSquadDTO newSquad)
         {
