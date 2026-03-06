@@ -8,5 +8,7 @@ namespace PDHours.Infra.Data.Repositories
     public class ReportRepository : Repository<ReportModel>, IReportRepository
     {
         public ReportRepository(DataContext db) : base(db) { }
+
+        
     }
 }

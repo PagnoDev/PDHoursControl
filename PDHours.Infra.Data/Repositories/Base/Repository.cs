@@ -5,7 +5,7 @@ namespace PDHours.Infra.Data.Repositories.Base
 {
     public abstract class Repository<T> : IRepository<T> where T : class
     {
-        private readonly DataContext _db;
+        protected readonly DataContext _db;
 
         public Repository(DataContext db)
         {

@@ -23,6 +23,12 @@ namespace PDHours.Infra.Data.Database.Context
                 .HasMany(s => s.Employees)
                 .WithOne(e => e.Squad)
                 .HasForeignKey(e => e.SquadId);
+
+            // Configura Created_At para ser preenchido automaticamente pelo banco
+            modelBuilder.Entity<ReportModel>()
+                .Property(r => r.Created_At)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .ValueGeneratedOnAdd();
         }
     }
 }
