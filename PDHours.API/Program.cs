@@ -15,7 +15,16 @@ builder.Services.AddSwaggerGen();
 //Adciona as dependências do projeto (Costumo deixar na pasta Config)
 builder.Services.AddProjectServices(builder.Configuration);
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableDetailedErrors();
+        options.EnableSensitiveDataLogging();
+        options.LogTo(Console.WriteLine, LogLevel.Information);
+    }
+});
 
 builder.Services.AddOData(options => options.Select()
                                             .Filter()
