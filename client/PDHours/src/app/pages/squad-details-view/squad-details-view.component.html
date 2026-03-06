@@ -1,0 +1,107 @@
+<main class="page">
+  <h2 class="page-title">{{ squadName() }}</h2>
+
+  <section class="panel">
+    <h3 class="section-title">Horas por membro</h3>
+
+    <div class="filters">
+      <label>
+        Inicio
+        <div class="date-field">
+          <button
+            type="button"
+            class="date-trigger"
+            [disabled]="!hasRegisteredEmployees()"
+            (click)="openDatePicker(startInput)"
+            aria-label="Abrir calendario de inicio"
+          >
+            <img src="/assets/icons/calendar.svg" alt="" aria-hidden="true" />
+          </button>
+          <input
+            #startInput
+            type="date"
+            [value]="startDate()"
+            [disabled]="!hasRegisteredEmployees()"
+            (input)="onStartDateChange($event)"
+          />
+        </div>
+      </label>
+      <label>
+        Fim
+        <div class="date-field">
+          <button
+            type="button"
+            class="date-trigger"
+            [disabled]="!hasRegisteredEmployees()"
+            (click)="openDatePicker(endInput)"
+            aria-label="Abrir calendario de fim"
+          >
+            <img src="/assets/icons/calendar.svg" alt="" aria-hidden="true" />
+          </button>
+          <input
+            #endInput
+            type="date"
+            [value]="endDate()"
+            [disabled]="!hasRegisteredEmployees()"
+            (input)="onEndDateChange($event)"
+          />
+        </div>
+      </label>
+      <button
+        type="button"
+        class="filter-btn"
+        [disabled]="!hasRegisteredEmployees()"
+        (click)="applyDateFilter()"
+      >
+        Filtrar por data
+      </button>
+    </div>
+
+    @if (loading()) {
+      <section class="state-card">
+        <p>Carregando detalhes da squad...</p>
+      </section>
+    } @else if (hasError()) {
+      <section class="state-card">
+        <p>Nao foi possivel carregar os detalhes da squad.</p>
+        <a routerLink="/Squad/DataView" class="back-link">Voltar</a>
+      </section>
+    } @else if (members().length === 0) {
+      <section class="empty-details-card">
+        <img src="/assets/icons/emoji-5.svg" alt="" aria-hidden="true" />
+        <p>Nenhum intervalo de data selecionado. Selecione um intervalo para comecar.</p>
+      </section>
+    } @else {
+      <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>Membro</th>
+              <th>Descricao</th>
+              <th>Horas totais do employee</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (member of members(); track member.employeeId) {
+              <tr>
+                <td>{{ member.name }}</td>
+                <td>{{ member.lastDescription }}</td>
+                <td>{{ member.totalHours }}</td>
+                <td>{{ formatCreatedAt(member.lastCreatedAt) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <section class="summary">
+        <p>Horas totais da squad</p>
+        <strong>{{ totalHours() }} Horas</strong>
+
+        <p>Media de horas por dia</p>
+        <strong>{{ averageHoursPerDay() }} Horas/Dia</strong>
+      </section>
+    }
+  </section>
+</main>

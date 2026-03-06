@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using PDHours.Application.DTOs.ReportDTO;
 using PDHours.Application.Interfaces.IServices;
 using PDHours.Domain.Models;
 
 namespace PDHours.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ReportController : ControllerBase
     {
@@ -18,17 +18,31 @@ namespace PDHours.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllReports()
+        public async Task<IActionResult> GetAllReports(ODataQueryOptions<ReportModel> queryOptions)
         {
             try
             {
                 var reports = await _service.GetAll();
-                return Ok(reports);
+                IQueryable queriedReports = queryOptions.ApplyTo(reports);
+                return Ok(queriedReports);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
             }
+        }
+
+        [HttpGet("LastByEmployee/{employeeId}")]
+        public async Task<IActionResult> GetLastReportByEmployeeId(int employeeId)
+        {
+            var lastReport = await _service.GetLastReportByEmployeeId(employeeId);
+
+            if (lastReport == null)
+            {
+                return NotFound(new { message = $"Nenhum report encontrado para o employeeId {employeeId}." });
+            }
+
+            return Ok(lastReport);
         }
 
         [HttpPost]

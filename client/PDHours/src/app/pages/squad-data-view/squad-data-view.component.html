@@ -1,0 +1,75 @@
+<main class="page">
+  <h2 class="page-title">Lista de Squads</h2>
+  <section class="panel" [class.panel-empty]="hasNoSquadData()">
+  @if (loading()) {
+    <section class="state-card">
+      <p>Carregando dados...</p>
+    </section>
+  } @else if (hasNoSquadData() || hasError()) {
+    <section class="empty-squad-card">
+      <img src="/assets/icons/emoji-5.svg" alt="" aria-hidden="true" />
+      <p>Nenhuma squad cadastrada. Crie uma squad para começar.</p>
+      <button type="button" class="action-btn" (click)="openCreateModal()">Criar squad</button>
+    </section>
+  } @else {
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (squad of squads(); track squad.id) {
+            <tr>
+              <td>{{ squad.id }}</td>
+              <td>{{ squad.name }}</td>
+              <td class="actions-cell">
+                <button type="button" class="mini-btn" [routerLink]="['/Squad/Details', squad.id]">Visitar squad</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <button type="button" class="action-btn" (click)="openCreateModal()">Criar squad</button>
+  }
+  </section>
+</main>
+
+@if (createModalOpen()) {
+  <section class="modal-overlay" (click)="closeCreateModal()">
+    <article class="create-modal" (click)="$event.stopPropagation()">
+      <h3>Criar Squad</h3>
+
+      <label for="squad-name">Nome da squad</label>
+      <input
+        id="squad-name"
+        type="text"
+        placeholder="Digite o nome da squad"
+        [value]="squadName()"
+        (input)="onSquadNameInput($event)"
+      />
+
+      @if (squadNameInvalid()) {
+        <p class="field-error">O nome da squad e obrigatorio.</p>
+      }
+
+      @if (createErrorMessage()) {
+        <p class="field-error">{{ createErrorMessage() }}</p>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="action-btn" (click)="submitCreateSquad()" [disabled]="createSubmitting()">
+          @if (createSubmitting()) {
+            Criando...
+          } @else {
+            Criar squad
+          }
+        </button>
+      </div>
+    </article>
+  </section>
+}

@@ -4,6 +4,7 @@ using PDHours.API.DependencyInjection;
 using PDHours.Infra.Data.Database.Context;
 
 var builder = WebApplication.CreateBuilder(args);
+const string CorsPolicyName = "AngularLocalhost";
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -32,6 +33,16 @@ builder.Services.AddOData(options => options.Select()
                                             .Count()
                                             .Expand());
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicyName, policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,6 +53,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(CorsPolicyName);
 
 app.UseAuthorization();
 

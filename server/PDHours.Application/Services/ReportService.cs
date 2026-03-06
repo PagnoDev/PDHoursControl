@@ -1,6 +1,7 @@
 ﻿using PDHours.Application.Interfaces.IRepositories;
 using PDHours.Application.Interfaces.IServices;
 using PDHours.Application.Services.Base;
+using PDHours.Application.DTOs.ReportDTO;
 using PDHours.Domain.Models;
 
 namespace PDHours.Application.Services
@@ -26,6 +27,11 @@ namespace PDHours.Application.Services
             }
 
             base.Add(entity);
+        }
+
+        public async Task<LastReportByEmployeeDTO?> GetLastReportByEmployeeId(int employeeId)
+        {
+            return await _repository.GetLastReportByEmployeeId(employeeId);
         }
     }
 }

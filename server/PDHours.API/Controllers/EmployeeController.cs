@@ -4,7 +4,7 @@ using PDHours.Application.Interfaces.IServices;
 
 namespace PDHours.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class EmployeeController : ControllerBase
     {

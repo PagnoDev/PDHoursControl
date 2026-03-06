@@ -1,39 +1,67 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
+:root {
+  --color-blue: #4263eb;
+  --color-purple: #7048e8;
+  --color-pink: #51cf66;
+  --color-black: #212429;
+  --color-gray-4: #495057;
+  --color-gray-3: #acb5bd;
+  --color-gray-2: #dde2e5;
+  --color-gray-1: #f8f9fa;
 
-html {
-  height: 100%;
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$magenta-palette,
-        tertiary: mat.$violet-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
+  --bg: var(--color-gray-1);
+  --surface: #ffffff;
+  --surface-strong: #f3f5f8;
+  --text-color: var(--color-black);
+  --text-muted: var(--color-gray-3);
+  --border-color: var(--color-gray-2);
+  --card-shadow: 0 10px 24px -16px rgba(33, 36, 41, 0.22);
+  --data-panel-width: 860px;
+
+  --font-size-h1: 3.157rem;
+  --font-size-h2: 2.369rem;
+  --font-size-h3: 1.777rem;
+  --font-size-h4: 1.333rem;
+  --font-size-p: 1rem;
+  --font-size-small: 0.75rem;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
-  height: 100%;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text-color);
+  font-family: "Roboto", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--font-size-p);
+  line-height: 1.5;
 }
-/* You can add global styles to this file, and also import other style files */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+  color: var(--color-black);
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: 500;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: 500;
+}
+
+p,
+small {
+  color: var(--color-gray-4);
+}

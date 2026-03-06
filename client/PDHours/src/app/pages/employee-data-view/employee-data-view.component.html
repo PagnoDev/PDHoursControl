@@ -1,0 +1,151 @@
+<main class="page">
+  <h2 class="page-title">Lista de Usuarios</h2>
+  <section class="panel" [class.panel-empty]="hasNoSquads()">
+  @if (loading()) {
+    <section class="state-card">
+      <p>Carregando dados...</p>
+    </section>
+  } @else if (hasNoSquads()) {
+    <section class="empty-squad-card">
+      <img src="/assets/icons/emoji-5.svg" alt="" aria-hidden="true" />
+      <p>Nenhuma squad cadastrada. Crie uma squad para comecar.</p>
+      <button type="button" class="action-btn" (click)="openCreateSquadModal()">Criar squad</button>
+    </section>
+  } @else if (hasError()) {
+    <section class="state-card">
+      <p>Nao foi possivel carregar os dados. Exibindo estado vazio.</p>
+    </section>
+  } @else if (employees().length === 0) {
+    <section class="empty-users-card">
+      <img src="/assets/icons/emoji-5.svg" alt="" aria-hidden="true" />
+      <p>Nenhum usuario cadastrado. Crie um usuario para comecar.</p>
+      <button type="button" class="action-btn" (click)="openCreateModal()">Criar usuario</button>
+    </section>
+  } @else {
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Horas</th>
+            <th>Squad ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (employee of employees(); track employee.name + '-' + employee.squadId) {
+            <tr>
+              <td>{{ employee.name }}</td>
+              <td>{{ employee.estimateHours }}</td>
+              <td>{{ employee.squadId }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <button type="button" class="action-btn" (click)="openCreateModal()">Criar usuario</button>
+  }
+  </section>
+</main>
+
+@if (createModalOpen()) {
+  <section class="modal-overlay" (click)="closeCreateModal()">
+    <article class="create-modal employee-modal" (click)="$event.stopPropagation()">
+      <h3>Criar Usuario</h3>
+
+      @if (createErrorMessage()) {
+        <div class="error-banner">
+          <img class="error-icon-svg" src="/assets/icons/error.svg" alt="" aria-hidden="true" />
+          <p>{{ createErrorMessage() }}</p>
+          <button type="button" class="close-banner-btn" (click)="closeCreateErrorBanner()">x</button>
+        </div>
+      }
+
+      <label for="employee-name">Nome do usuario</label>
+      <input
+        id="employee-name"
+        type="text"
+        placeholder="Digite o nome do usuario"
+        [value]="createUserName()"
+        (input)="onCreateUserNameInput($event)"
+      />
+      @if (userNameInvalid()) {
+        <p class="field-error">O nome do usuario e obrigatorio.</p>
+      }
+
+      <label for="employee-estimated-hours">Horas estimadas de trabalho</label>
+      <input
+        id="employee-estimated-hours"
+        type="number"
+        placeholder="Digite a quantidade de horas"
+        [value]="createEstimatedHours()"
+        (input)="onCreateEstimatedHoursInput($event)"
+      />
+      @if (estimatedHoursInvalid()) {
+        <p class="field-error">Horas estimadas deve ser maior que 0.</p>
+      }
+
+      <label for="employee-squad-id">Squad</label>
+      <div class="input-wrapper">
+        <input
+          id="employee-squad-id"
+          type="number"
+          placeholder="Digite o Id da squad"
+          [value]="createSquadId()"
+          [class.input-error]="squadFieldError()"
+          (input)="onCreateSquadIdInput($event)"
+        />
+        @if (squadFieldError()) {
+          <img class="input-error-icon-svg" src="/assets/icons/error.svg" alt="" aria-hidden="true" />
+        }
+      </div>
+      @if (squadFieldError()) {
+        <p class="field-error">Error</p>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="action-btn" (click)="submitCreateEmployee()" [disabled]="createSubmitting()">
+          @if (createSubmitting()) {
+            Criando...
+          } @else {
+            Criar usuario
+          }
+        </button>
+      </div>
+    </article>
+  </section>
+}
+
+@if (createSquadModalOpen()) {
+  <section class="modal-overlay" (click)="closeCreateSquadModal()">
+    <article class="create-modal" (click)="$event.stopPropagation()">
+      <h3>Criar Squad</h3>
+
+      <label for="squad-name-from-users">Nome da squad</label>
+      <input
+        id="squad-name-from-users"
+        type="text"
+        placeholder="Digite o nome da squad"
+        [value]="createSquadName()"
+        (input)="onCreateSquadNameInput($event)"
+      />
+
+      @if (createSquadNameInvalid()) {
+        <p class="field-error">O nome da squad e obrigatorio.</p>
+      }
+
+      @if (createSquadErrorMessage()) {
+        <p class="field-error">{{ createSquadErrorMessage() }}</p>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="action-btn" (click)="submitCreateSquad()" [disabled]="createSquadSubmitting()">
+          @if (createSquadSubmitting()) {
+            Criando...
+          } @else {
+            Criar squad
+          }
+        </button>
+      </div>
+    </article>
+  </section>
+}
