@@ -107,8 +107,8 @@ export class DataViewService {
     );
   }
 
-  getSquadTotalHours(id: number): Observable<SquadTotalHoursDto> {
-    return this.http.get<SquadTotalHoursDto>(`${this.apiBaseUrl}/Squad/MemberReportsTotalHours?id=${id}`);
+  getSquadTotalHours(id: number, startDate: string, endDate: string): Observable<SquadTotalHoursDto> {
+    return this.http.get<SquadTotalHoursDto>(`${this.apiBaseUrl}/Squad/MemberReportsTotalHours?id=${id}&startDate=${startDate}&endDate=${endDate}`);
   }
 
   getSquadDailyAverage(id: number, startDate: string, endDate: string): Observable<SquadDailyAverageDto> {
@@ -130,7 +130,7 @@ export class DataViewService {
 
         return forkJoin(
           members.map((member) =>
-            this.getEmployeeLatestReport(member.employeeId).pipe(
+            this.getEmployeeLatestReport(member.employeeId, startDate, endDate).pipe(
               map((latestReport) => ({
                 employeeId: member.employeeId,
                 name: member.name,
@@ -145,7 +145,11 @@ export class DataViewService {
     );
   }
 
-  getEmployeeLatestReport(employeeId: number): Observable<EmployeeLatestReportDto | null> {
+  getEmployeeLatestReport(
+    employeeId: number,
+    startDate: string,
+    endDate: string
+  ): Observable<EmployeeLatestReportDto | null> {
     const filterExpr = `EmployeeId eq ${employeeId}`;
     const url =
       `${this.apiBaseUrl}/Report` +
@@ -153,13 +157,32 @@ export class DataViewService {
       `&$orderby=${encodeURIComponent('Created_At desc')}`;
 
     return this.http.get<unknown>(url).pipe(
-      map((response) => this.extractLatestReport(response)),
+      map((response) => this.extractLatestReport(response, startDate, endDate)),
       catchError(() => of(null))
     );
   }
 
-  private extractLatestReport(response: unknown): EmployeeLatestReportDto | null {
-    const rows = this.extractRows(response);
+  private extractLatestReport(
+    response: unknown,
+    startDate: string,
+    endDate: string
+  ): EmployeeLatestReportDto | null {
+    const startRangeTime = new Date(`${startDate}T00:00:00`).getTime();
+    const endRangeTime = new Date(`${endDate}T23:59:59`).getTime();
+    const rows = this.extractRows(response).filter((row) => {
+      const dateValue = this.readStringProp(row, DataViewService.REPORT_DATE_KEYS);
+      if (!dateValue) {
+        return false;
+      }
+
+      const reportTime = new Date(dateValue).getTime();
+      if (Number.isNaN(reportTime)) {
+        return false;
+      }
+
+      return reportTime >= startRangeTime && reportTime <= endRangeTime;
+    });
+
     if (rows.length === 0) {
       return null;
     }

@@ -150,7 +150,10 @@ export class SquadDetailsViewComponent implements OnInit {
         this.startDate(),
         this.endDate()
       ),
-      total: this.dataViewService.getSquadTotalHours(this.squadId()),
+      total: this.dataViewService.getSquadTotalHours(
+        this.squadId(),
+        this.startDate(),
+        this.endDate()),
       average: this.dataViewService.getSquadDailyAverage(
         this.squadId(),
         this.startDate(),
