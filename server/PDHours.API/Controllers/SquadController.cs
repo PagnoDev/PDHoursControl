@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.EntityFrameworkCore;
 using PDHours.Application.DTOs.EmployeeDTO;
 using PDHours.Application.DTOs.SquadDTO;
 using PDHours.Application.Interfaces.IServices;
@@ -76,14 +75,14 @@ namespace PDHours.API.Controllers
         }
 
         [HttpGet("MemberReportsTotalHours")]
-        public async Task<IActionResult> GetMemberReportsTotalHours(int id)
+        public async Task<IActionResult> GetMemberReportsTotalHours(int id, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
         {
             SquadModel? squad = await _service.GetById(id);
 
             if (squad == null)
                 return NotFound(new { message = $"Squad com ID {id} não encontrada" });
 
-            int totalHours = await _service.GetTotalHours(id);
+            int totalHours = await _service.GetTotalHours(id, startDate, endDate);
 
             return Ok(new
             {

@@ -51,12 +51,17 @@ namespace PDHours.Infra.Data.Repositories
             return data;
         }
 
-        public async Task<int> GetTotalHours(int id)
+        public async Task<int> GetTotalHours(int id, DateTime? startDate = null, DateTime? endDate = null)
         {
+            DateTime? startDateUtc = startDate.HasValue ? DateTime.SpecifyKind(startDate.Value.Date, DateTimeKind.Utc) : (DateTime?)null;
+            DateTime? endDateUtcExclusive = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value.Date.AddHours(24), DateTimeKind.Utc) : (DateTime?)null;
+
             int totalHours = await _db.Squads
                 .Where(s => s.Id == id)
                 .Select(s => s.Employees
-                    .Sum(e => e.Reports
+                    .Sum(e => e.Reports.Where(r =>
+                            (!startDateUtc.HasValue || r.Created_At >= startDateUtc.Value) &&
+                            (!endDateUtcExclusive.HasValue || r.Created_At <= endDateUtcExclusive.Value))
                     .Sum(r => r.SpentHours)))
                 .FirstOrDefaultAsync();
 

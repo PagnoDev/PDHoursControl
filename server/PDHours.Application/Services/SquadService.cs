@@ -27,9 +27,9 @@ namespace PDHours.Application.Services
             return await _repository.GetHourByMember(id, startDate, endDate);
         }
 
-        public async Task<int> GetTotalHours(int id)
+        public async Task<int> GetTotalHours(int id, DateTime? startDate = null, DateTime? endDate = null)
         {
-            return await _repository.GetTotalHours(id);
+            return await _repository.GetTotalHours(id, startDate, endDate);
         }
 
         public async Task<SquadDailyAverageDTO?> GetDailyAverageByPeriod(int id, DateTime startDate, DateTime endDate)
