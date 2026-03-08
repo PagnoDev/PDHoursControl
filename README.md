@@ -97,26 +97,20 @@ Connection string padrão em `server/PDHours.API/appsettings.Development.json`:
 
 Ajuste usuário/senha conforme seu ambiente.
 
-#### 2) Aplicar migrations
-
-No diretório raiz:
-
-```bash
-dotnet ef database update --project server/PDHours.Infra.Data --startup-project server/PDHours.API
-```
-
-#### 3) Subir a API
+#### 2) Subir a API (com auto-migrate)
 
 ```bash
 dotnet run --project server/PDHours.API
 ```
 
+Ao iniciar, a API aplica automaticamente as migrations pendentes (`db.Database.Migrate()`), desde que o banco configurado na connection string esteja acessível.
+
 API local:
 
-- `https://localhost:7185`
-- Swagger: `https://localhost:7185/swagger`
+- `http://localhost:5022`
+- Swagger: `http://localhost:5022/swagger`
 
-#### 4) Subir o frontend
+#### 3) Subir o frontend
 
 Em outro terminal:
 
@@ -140,7 +134,7 @@ Rotas da aplicação Angular:
 
 Integração principal (service):
 
-- Base URL API: `https://localhost:7185`
+- Base URL API: `http://localhost:5022`
 - Arquivo: `client/PDHours/src/app/core/services/data-view.service.ts`
 
 Uso de OData no front:
@@ -151,7 +145,7 @@ Uso de OData no front:
 
 ## Documentação das APIs
 
-Base URL local: `https://localhost:7185`
+Base URL local: `http://localhost:5022`
 
 ## Employees
 
@@ -338,4 +332,4 @@ Atendendo aos requisitos:
 - README com instruções de execução: **este arquivo**
 - Documentação de rotas: **Swagger (`/swagger`) + seção de APIs acima**
 - Repositório GitHub/GitLab: **a ser informado no envio**
-- Acesso ao banco: **via string de conexão local e migrations**
+- Acesso ao banco: **via string de conexão local (migrations aplicadas automaticamente ao iniciar a API)**
