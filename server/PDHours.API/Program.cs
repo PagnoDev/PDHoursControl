@@ -6,6 +6,8 @@ using PDHours.Infra.Data.Database.Context;
 var builder = WebApplication.CreateBuilder(args);
 const string CorsPolicyName = "AngularLocalhost";
 
+builder.WebHost.UseUrls("http://0.0.0.0:5022");
+
 // Add services to the container.
 builder.Services.AddControllers();
 
@@ -44,6 +46,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
