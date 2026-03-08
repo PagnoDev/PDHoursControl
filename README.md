@@ -81,7 +81,8 @@ PDHours/
 
 - .NET SDK 10 instalado
 - Node.js + npm
-- PostgreSQL rodando localmente
+- PostgreSQL rodando localmente (ou em container)
+- Docker Desktop (opcional, para rodar API + banco via container)
 
 #### 1) Configurar banco de dados
 
@@ -99,16 +100,28 @@ Ajuste usuário/senha conforme seu ambiente.
 
 #### 2) Subir a API (com auto-migrate)
 
+Opção A - Local (`dotnet run`)
+
 ```bash
 dotnet run --project server/PDHours.API
 ```
 
-Ao iniciar, a API aplica automaticamente as migrations pendentes (`db.Database.Migrate()`), desde que o banco configurado na connection string esteja acessível.
+Ao iniciar, a API aplica automaticamente as migrations pendentes (`db.Database.Migrate()`), desde que o banco configurado na **connection string** do **appsettings.development.json** esteja acessível.
 
 API local:
 
 - `http://localhost:5022`
 - Swagger: `http://localhost:5022/swagger`
+
+Opção B - Docker (configuração disponível na branch `Feat/Add_Docker_Container`)
+
+```bash
+git checkout Feat/Add_Docker_Container
+cd server
+docker compose up --build
+```
+
+Nessa opção, a API e o PostgreSQL sobem juntos via `docker-compose.yml` e a API mantém o auto-migrate na inicialização.
 
 #### 3) Subir o frontend
 
