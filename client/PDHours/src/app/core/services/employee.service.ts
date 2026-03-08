@@ -11,7 +11,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
   private readonly http = inject(HttpClient);
-  private readonly apiBaseUrl = 'https://localhost:7185';
+  private readonly apiBaseUrl = 'http://localhost:5022';
 
   getEmployeeTableView(): Observable<EmployeeTableView[]> {
     return forkJoin({
