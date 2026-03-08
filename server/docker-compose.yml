@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pdhours-db
+    environment:
+      POSTGRES_DB: PDHours
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: P@ssw0rd
+    ports:
+      - "5432:5432"
+    volumes:
+      - pdhours_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d PDHours"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    container_name: pdhours-api
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "5022:5022"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5022
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Username=postgres;Password=P@ssw0rd;Database=PDHours
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pdhours_pgdata:
