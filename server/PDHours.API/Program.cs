@@ -19,7 +19,26 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddProjectServices(builder.Configuration);
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    var provider = builder.Configuration["DatabaseProvider"]?.Trim().ToLowerInvariant();
+
+    switch (provider)
+    {
+        case "postgresql":
+        case "postgres":
+            var pgConnectionString = builder.Configuration.GetConnectionString("PostgreSql")
+                ?? throw new InvalidOperationException("Connection string 'PostgreSql' não encontrada.");
+            options.UseNpgsql(pgConnectionString);
+            break;
+
+        case "mysql":
+            var mySqlConnectionString = builder.Configuration.GetConnectionString("MySql")
+                ?? throw new InvalidOperationException("Connection string 'MySql' não encontrada.");
+            options.UseMySql(mySqlConnectionString, new MySqlServerVersion(new Version(8, 0, 36)));
+            break;
+
+        default:
+            throw new InvalidOperationException("DatabaseProvider inválido. Use 'PostgreSql' ou 'MySql'.");
+    }
 
     if (builder.Environment.IsDevelopment())
     {

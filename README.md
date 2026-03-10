@@ -1,4 +1,4 @@
-﻿# PD Hours Control
+# PD Hours Control
 
 Documentação do desafio técnico da PD Soluções para controle de horas por squad.
 
@@ -113,7 +113,7 @@ API local:
 - `http://localhost:5022`
 - Swagger: `http://localhost:5022/swagger`
 
-Opção B - Docker (configuração disponível na branch `Feat/Add_Docker_Container`)
+Opção B - Docker
 
 ```bash
 git checkout Feat/Add_Docker_Container
