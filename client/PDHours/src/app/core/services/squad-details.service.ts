@@ -13,6 +13,7 @@ import {
 export class SquadDetailsService {
   private readonly http = inject(HttpClient);
   private readonly apiBaseUrl = 'http://localhost:5022';
+  private readonly odataCollectionKeys = ['value', 'items', 'data'] as const;
 
   getSquadMemberDetails(
     id: number,
@@ -77,28 +78,23 @@ export class SquadDetailsService {
     const url =
       `${this.apiBaseUrl}/Report` +
       `?$filter=${encodeURIComponent(filterExpr)}` +
-      `&$orderby=${encodeURIComponent('Created_At desc')}`;
+      `&$orderby=${encodeURIComponent('created_At desc')}`;
 
-    return this.http.get<unknown>(url).pipe(
+    return this.http.get<Record<string, unknown> | ReportRow[]>(url).pipe(
       map((response) => this.extractLatestReport(response, startDate, endDate)),
       catchError(() => of(null))
     );
   }
 
   private extractLatestReport(
-    response: unknown,
+    response: Record<string, unknown> | ReportRow[],
     startDate: string,
     endDate: string
   ): EmployeeLatestReportDto | null {
     const startRangeTime = new Date(`${startDate}T00:00:00`).getTime();
     const endRangeTime = new Date(`${endDate}T23:59:59`).getTime();
     const rows = this.extractRows(response).filter((row) => {
-      const dateValue = this.readReportCreatedAt(row);
-      if (!dateValue) {
-        return false;
-      }
-
-      const reportTime = new Date(dateValue).getTime();
+      const reportTime = new Date(row.created_At).getTime();
       if (Number.isNaN(reportTime)) {
         return false;
       }
@@ -111,42 +107,15 @@ export class SquadDetailsService {
     }
 
     const latest = [...rows].sort((first, second) => {
-      const firstDate = this.readReportCreatedAt(first) ?? '';
-      const secondDate = this.readReportCreatedAt(second) ?? '';
-      const firstTime = firstDate ? new Date(firstDate).getTime() : 0;
-      const secondTime = secondDate ? new Date(secondDate).getTime() : 0;
+      const firstTime = new Date(first.created_At).getTime();
+      const secondTime = new Date(second.created_At).getTime();
       return secondTime - firstTime;
     })[0];
 
-    const description = this.readReportDescription(latest) ?? '';
-    const createdAt = this.readReportCreatedAt(latest) ?? '';
-    if (!createdAt) {
-      return null;
-    }
-
     return {
-      description: description || '-',
-      createdAt
+      description: latest.description || '-',
+      createdAt: latest.created_At
     };
-  }
-
-  private readReportDescription(row: Record<string, unknown>): string | null {
-    return this.readStringField(row, ['description']);
-  }
-
-  private readReportCreatedAt(row: Record<string, unknown>): string | null {
-    return this.readStringField(row, ['created_At']);
-  }
-
-  private readStringField(row: Record<string, unknown>, keys: string[]): string | null {
-    for (const key of keys) {
-      const value = row[key];
-      if (typeof value === 'string' && value.trim().length > 0) {
-        return value;
-      }
-    }
-
-    return null;
   }
 
   /**
@@ -155,25 +124,24 @@ export class SquadDetailsService {
    * Além disso, ele garante que os itens extraídos sejam objetos válidos, filtrando valores nulos ou de tipos inesperados.
    * Caso alguém altere o filtro do OData e a resposta deixe de conter os dados esperados, o método ainda tentará extrair o máximo de informações possível, retornando um array vazio ou um objeto único conforme o caso, ao invés de lançar erros.
    */
-  private extractRows(response: unknown): Record<string, unknown>[] {
+  private extractRows(response: Record<string, unknown> | ReportRow[]): ReportRow[] {
     if (Array.isArray(response)) {
-      return response.filter((item): item is Record<string, unknown> => !!item && typeof item === 'object');
+      return response as ReportRow[];
     }
 
-    if (!response || typeof response !== 'object') {
-      return [];
-    }
-
-    const responseObject = response as Record<string, unknown>;
-    for (const key of ['value', 'items', 'data']) {
+    for (const key of this.odataCollectionKeys) {
+      const responseObject = response as Partial<Record<(typeof this.odataCollectionKeys)[number], unknown>>;
       const possibleArray = responseObject[key];
       if (Array.isArray(possibleArray)) {
-        return possibleArray.filter(
-          (item): item is Record<string, unknown> => !!item && typeof item === 'object'
-        );
+        return possibleArray as ReportRow[];
       }
     }
 
-    return [responseObject];
+    return [response as unknown as ReportRow];
   }
+}
+
+interface ReportRow {
+  created_At: string;
+  description: string;
 }

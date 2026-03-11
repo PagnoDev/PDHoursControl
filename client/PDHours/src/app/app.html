@@ -63,14 +63,12 @@
           placeholder="Digite o ID do usuário que realizou a tarefa"
           [value]="reportEmployeeId()"
           (input)="onReportEmployeeIdInput($event)"
+          [class.input-error]="employeeIdInvalid() || reportUserFieldError()"
         />
         @if (reportUserFieldError()) {
           <img class="input-error-icon-svg" src="/assets/icons/error.svg" alt="" aria-hidden="true" />
         }
       </div>
-      @if (employeeIdInvalid()) {
-        <p class="field-error">ID do usuário é obrigatório.</p>
-      }
 
       <label for="report-spent-hours">Horas gastas</label>
       <input
@@ -79,10 +77,8 @@
         placeholder="Digite a quantidade de horas"
         [value]="reportSpentHours()"
         (input)="onReportSpentHoursInput($event)"
+        [class.input-error]="spentHoursInvalid()"
       />
-      @if (spentHoursInvalid()) {
-        <p class="field-error">Horas gastas deve ser maior que 0.</p>
-      }
 
       <label for="report-description">Descrição</label>
       <textarea
@@ -91,10 +87,8 @@
         placeholder="Exemplo de texto de descrição da tarefa executada."
         [value]="reportDescription()"
         (input)="onReportDescriptionInput($event)"
+        [class.input-error]="descriptionInvalid()"
       ></textarea>
-      @if (descriptionInvalid()) {
-        <p class="field-error">A descrição é obrigatória.</p>
-      }
 
       <div class="modal-actions">
         <button type="button" class="action-btn" (click)="submitReport()" [disabled]="reportSubmitting()">

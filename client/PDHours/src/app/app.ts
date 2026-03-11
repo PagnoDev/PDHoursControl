@@ -59,12 +59,14 @@ export class App {
     const input = event.target as HTMLInputElement;
     this.reportSpentHours.set(input.value);
     this.spentHoursInvalid.set(false);
+    this.clearReportErrorMessage();
   }
 
   protected onReportDescriptionInput(event: Event): void {
     const input = event.target as HTMLTextAreaElement;
     this.reportDescription.set(input.value);
     this.descriptionInvalid.set(false);
+    this.clearReportErrorMessage();
   }
 
   protected submitReport(): void {
@@ -72,19 +74,10 @@ export class App {
     const spentHours = Number(this.reportSpentHours());
     const description = this.reportDescription().trim();
 
-    const hasInvalidEmployeeId = !Number.isFinite(employeeId) || employeeId <= 0;
-    const hasInvalidSpentHours = !Number.isFinite(spentHours) || spentHours <= 0;
-    const hasInvalidDescription = description.length === 0;
-
-    this.employeeIdInvalid.set(hasInvalidEmployeeId);
-    this.spentHoursInvalid.set(hasInvalidSpentHours);
-    this.descriptionInvalid.set(hasInvalidDescription);
-
-    if (hasInvalidEmployeeId || hasInvalidSpentHours || hasInvalidDescription) {
-      return;
-    }
-
     this.reportSubmitting.set(true);
+    this.employeeIdInvalid.set(false);
+    this.spentHoursInvalid.set(false);
+    this.descriptionInvalid.set(false);
     this.reportUserFieldError.set(false);
     this.reportErrorMessage.set('');
 
@@ -126,11 +119,10 @@ export class App {
 
   private handleCreateReportError(error: HttpErrorResponse): void {
     const errorMessage = this.readApiErrorMessage(error);
-    const isUserNotFoundError =
-      this.isUserNotFoundError(errorMessage) || error.status === 404 || error.status === 400;
+    const isUserNotFoundError = this.isUserNotFoundError(errorMessage) || error.status === 404;
 
     if (isUserNotFoundError) {
-      this.reportErrorMessage.set(App.USER_NOT_FOUND_ERROR);
+      this.reportErrorMessage.set(errorMessage || App.USER_NOT_FOUND_ERROR);
       this.reportUserFieldError.set(true);
       return;
     }
@@ -151,11 +143,30 @@ export class App {
       return error.error.title;
     }
 
+    if (error.error && typeof error.error.detail === 'string') {
+      return error.error.detail;
+    }
+
+    if (error.error && typeof error.error === 'object' && error.error.errors) {
+      const validationErrors = Object.values(error.error.errors)
+        .flat()
+        .filter((value): value is string => typeof value === 'string');
+
+      if (validationErrors.length > 0) {
+        return validationErrors[0];
+      }
+    }
+
     return '';
   }
 
   private isUserNotFoundError(message: string): boolean {
     const normalizedMessage = message.toLowerCase();
-    return normalizedMessage.includes('usuario') || normalizedMessage.includes('user');
+    return (
+      (normalizedMessage.includes('usuario') || normalizedMessage.includes('user')) &&
+      (normalizedMessage.includes('nao existe') ||
+        normalizedMessage.includes('not found') ||
+        normalizedMessage.includes('does not exist'))
+    );
   }
 }

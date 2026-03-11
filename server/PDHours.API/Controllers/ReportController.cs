@@ -22,7 +22,7 @@ namespace PDHours.API.Controllers
         {
             try
             {
-                var reports = await _service.GetAll();
+                IQueryable<ReportModel> reports = await _service.GetAll();
                 IQueryable queriedReports = queryOptions.ApplyTo(reports);
                 return Ok(queriedReports);
             }
@@ -35,7 +35,7 @@ namespace PDHours.API.Controllers
         [HttpGet("LastByEmployee/{employeeId}")]
         public async Task<IActionResult> GetLastReportByEmployeeId(int employeeId)
         {
-            var lastReport = await _service.GetLastReportByEmployeeId(employeeId);
+            LastReportByEmployeeDTO? lastReport = await _service.GetLastReportByEmployeeId(employeeId);
 
             if (lastReport == null)
             {
@@ -50,17 +50,7 @@ namespace PDHours.API.Controllers
         {
             try
             {
-                ReportModel newReport = new()
-                {
-                    Description = reportDTO.Description,
-                    EmployeeId = reportDTO.EmployeeId,
-                    SpentHours = reportDTO.SpentHours
-                };
-
-                _service.Add(newReport);
-
-                Console.WriteLine(newReport);
-
+                _service.Create(reportDTO);
                 return Created();
             }
             catch (InvalidOperationException ex)

@@ -1,5 +1,6 @@
 ﻿using PDHours.Application.Interfaces.IRepositories;
 using PDHours.Application.Interfaces.IServices;
+using PDHours.Application.Mappings;
 using PDHours.Application.Services.Base;
 using PDHours.Application.DTOs.ReportDTO;
 using PDHours.Domain.Models;
@@ -17,14 +18,23 @@ namespace PDHours.Application.Services
             _employeeRepository = employeeRepository;
         }
 
-        public new void Add(ReportModel entity)
+        public void Create(CreateReportDTO dto)
         {
-            var employee = _employeeRepository.GetById(entity.EmployeeId);
+            EmployeeModel? employee = _employeeRepository.GetById(dto.EmployeeId);
 
             if (employee == null)
-            {
+                throw new InvalidOperationException($"Employee com ID {dto.EmployeeId} não existe.");
+
+            ReportModel entity = dto.ToModel();
+            base.Add(entity);
+        }
+
+        public new void Add(ReportModel entity)
+        {
+            EmployeeModel? employee = _employeeRepository.GetById(entity.EmployeeId);
+
+            if (employee == null)
                 throw new InvalidOperationException($"Employee com ID {entity.EmployeeId} não existe.");
-            }
 
             base.Add(entity);
         }

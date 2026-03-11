@@ -6,6 +6,7 @@ namespace PDHours.Application.Interfaces.IServices
 {
     public interface IReportService : IBaseService<ReportModel>
     {
+        void Create(CreateReportDTO dto);
         Task<LastReportByEmployeeDTO?> GetLastReportByEmployeeId(int employeeId);
     }
 }

@@ -94,17 +94,15 @@ namespace PDHours.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateSquadDTO newSquad)
         {
-            if(String.IsNullOrWhiteSpace(newSquad.Name))
-                return UnprocessableEntity("O nome da squad é obrigatório.");
-
-            SquadModel sm = new()
+            try
             {
-                Name = newSquad.Name
-            };
-
-            _service.Add(sm);
-
-            return Created();
+                _service.Create(newSquad);
+                return Created();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return UnprocessableEntity(new { message = ex.Message });
+            }
         }
     }
 }

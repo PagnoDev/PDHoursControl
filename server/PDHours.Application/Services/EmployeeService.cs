@@ -1,6 +1,7 @@
 ﻿using PDHours.Application.DTOs.EmployeeDTO;
 using PDHours.Application.Interfaces.IRepositories;
 using PDHours.Application.Interfaces.IServices;
+using PDHours.Application.Mappings;
 using PDHours.Application.Services.Base;
 using PDHours.Domain.Models;
 
@@ -17,14 +18,23 @@ namespace PDHours.Application.Services
             _squadRepository = squadRepository;
         }
 
-        public new void Add(EmployeeModel entity)
+        public void Create(CreateEmployeeDTO dto)
         {
-            var squad = _squadRepository.GetById(entity.SquadId);
+            SquadModel? squad = _squadRepository.GetById(dto.SquadId);
 
             if (squad == null)
-            {
+                throw new InvalidOperationException($"Squad com ID {dto.SquadId} não existe.");
+
+            EmployeeModel entity = dto.ToModel();
+            base.Add(entity);
+        }
+
+        public new void Add(EmployeeModel entity)
+        {
+            SquadModel? squad = _squadRepository.GetById(entity.SquadId);
+
+            if (squad == null)
                 throw new InvalidOperationException($"Squad com ID {entity.SquadId} não existe.");
-            }
 
             base.Add(entity);
         }

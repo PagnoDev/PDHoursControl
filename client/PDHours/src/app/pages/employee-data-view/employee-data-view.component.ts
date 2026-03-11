@@ -15,8 +15,6 @@ import { SquadService } from '../../core/services/squad.service';
 export class EmployeeDataViewComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly squadService = inject(SquadService);
-
-  private static readonly SQUAD_NOT_FOUND_MESSAGE = 'nao existe squad com este id';
   private static readonly CREATE_EMPLOYEE_ERROR = 'Nao foi possivel criar o usuario.';
   private static readonly CREATE_SQUAD_ERROR = 'Nao foi possivel criar a squad.';
 
@@ -27,21 +25,19 @@ export class EmployeeDataViewComponent implements OnInit {
 
   protected readonly createModalOpen = signal(false);
   protected readonly createSubmitting = signal(false);
-  protected readonly createTouched = signal(false);
   protected readonly createUserName = signal('');
   protected readonly createEstimatedHours = signal('');
   protected readonly createSquadId = signal('');
   protected readonly createErrorMessage = signal('');
-  protected readonly squadValidationMessage = signal('');
 
   protected readonly createSquadModalOpen = signal(false);
   protected readonly createSquadSubmitting = signal(false);
-  protected readonly createSquadTouched = signal(false);
   protected readonly createSquadName = signal('');
   protected readonly createSquadErrorMessage = signal('');
 
   protected readonly userNameInvalid = signal(false);
   protected readonly estimatedHoursInvalid = signal(false);
+  protected readonly squadIdInvalid = signal(false);
   protected readonly createSquadNameInvalid = signal(false);
 
   ngOnInit(): void {
@@ -82,18 +78,20 @@ export class EmployeeDataViewComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     this.createUserName.set(input.value);
     this.userNameInvalid.set(false);
+    this.clearCreateEmployeeErrorMessage();
   }
 
   protected onCreateEstimatedHoursInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.createEstimatedHours.set(input.value);
     this.estimatedHoursInvalid.set(false);
+    this.clearCreateEmployeeErrorMessage();
   }
 
   protected onCreateSquadIdInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.createSquadId.set(input.value);
-    this.squadValidationMessage.set('');
+    this.squadIdInvalid.set(false);
     this.clearCreateEmployeeErrorMessage();
   }
 
@@ -107,33 +105,15 @@ export class EmployeeDataViewComponent implements OnInit {
   }
 
   protected submitCreateEmployee(): void {
-    this.createTouched.set(true);
-
     const name = this.createUserName().trim();
     const estimateHours = Number(this.createEstimatedHours());
-    const squadIdRaw = this.createSquadId().trim();
-    const squadId = Number(squadIdRaw);
-
-    const hasInvalidName = name.length === 0;
-    const hasInvalidHours = !Number.isFinite(estimateHours) || estimateHours <= 0;
-    const hasMissingSquadId = squadIdRaw.length === 0;
-    const hasInvalidSquadId = !hasMissingSquadId && (!Number.isFinite(squadId) || squadId <= 0);
-
-    this.userNameInvalid.set(hasInvalidName);
-    this.estimatedHoursInvalid.set(hasInvalidHours);
-    this.squadValidationMessage.set('');
-    if (hasMissingSquadId) {
-      this.squadValidationMessage.set('O id da squad e obrigatorio.');
-    } else if (hasInvalidSquadId) {
-      this.squadValidationMessage.set('O id da squad deve ser maior que 0.');
-    }
-
-    if (hasInvalidName || hasInvalidHours || hasMissingSquadId || hasInvalidSquadId) {
-      return;
-    }
+    const squadId = Number(this.createSquadId().trim());
 
     this.createSubmitting.set(true);
     this.createErrorMessage.set('');
+    this.userNameInvalid.set(false);
+    this.estimatedHoursInvalid.set(false);
+    this.squadIdInvalid.set(false);
 
     this.employeeService
       .createEmployee({ name, estimateHours, squadId })
@@ -155,15 +135,7 @@ export class EmployeeDataViewComponent implements OnInit {
   }
 
   protected submitCreateSquad(): void {
-    this.createSquadTouched.set(true);
-
     const name = this.createSquadName().trim();
-    const hasInvalidName = name.length === 0;
-    this.createSquadNameInvalid.set(hasInvalidName);
-
-    if (hasInvalidName) {
-      return;
-    }
 
     this.createSquadSubmitting.set(true);
     this.createSquadErrorMessage.set('');
@@ -210,19 +182,17 @@ export class EmployeeDataViewComponent implements OnInit {
 
   private resetCreateEmployeeFormState(): void {
     this.createSubmitting.set(false);
-    this.createTouched.set(false);
     this.createUserName.set('');
     this.createEstimatedHours.set('');
     this.createSquadId.set('');
     this.createErrorMessage.set('');
-    this.squadValidationMessage.set('');
     this.userNameInvalid.set(false);
     this.estimatedHoursInvalid.set(false);
+    this.squadIdInvalid.set(false);
   }
 
   private resetCreateSquadFormState(): void {
     this.createSquadSubmitting.set(false);
-    this.createSquadTouched.set(false);
     this.createSquadName.set('');
     this.createSquadErrorMessage.set('');
     this.createSquadNameInvalid.set(false);
@@ -236,13 +206,17 @@ export class EmployeeDataViewComponent implements OnInit {
 
   private handleCreateEmployeeError(error: HttpErrorResponse): void {
     const errorMessage = this.readApiErrorMessage(error);
-    const squadNotFoundError =
-      this.isSquadNotFoundError(errorMessage) || error.status === 404 || error.status === 400;
+    const squadNotFoundError = this.isSquadNotFoundError(errorMessage) || error.status === 404;
 
     if (squadNotFoundError) {
-      this.createErrorMessage.set(EmployeeDataViewComponent.SQUAD_NOT_FOUND_MESSAGE);
-      this.squadValidationMessage.set('Nao existe squad com este id.');
+      const squadMessage = errorMessage || 'Nao existe squad com este id.';
+      this.createErrorMessage.set(squadMessage);
+      this.squadIdInvalid.set(true);
       return;
+    }
+
+    if (this.isEstimateHoursRangeError(errorMessage)) {
+      this.estimatedHoursInvalid.set(true);
     }
 
     this.createErrorMessage.set(errorMessage || EmployeeDataViewComponent.CREATE_EMPLOYEE_ERROR);
@@ -261,6 +235,20 @@ export class EmployeeDataViewComponent implements OnInit {
       return error.error.title;
     }
 
+    if (error.error && typeof error.error.detail === 'string') {
+      return error.error.detail;
+    }
+
+    if (error.error && typeof error.error === 'object' && error.error.errors) {
+      const validationErrors = Object.values(error.error.errors)
+        .flat()
+        .filter((value): value is string => typeof value === 'string');
+
+      if (validationErrors.length > 0) {
+        return validationErrors[0];
+      }
+    }
+
     return '';
   }
 
@@ -271,6 +259,15 @@ export class EmployeeDataViewComponent implements OnInit {
       (normalizedMessage.includes('nao existe') ||
         normalizedMessage.includes('not found') ||
         normalizedMessage.includes('does not exist'))
+    );
+  }
+
+  private isEstimateHoursRangeError(message: string): boolean {
+    const normalizedMessage = message.toLowerCase();
+    return (
+      normalizedMessage.includes('estimate') &&
+      normalizedMessage.includes('hour') &&
+      (normalizedMessage.includes('1') || normalizedMessage.includes('12'))
     );
   }
 }

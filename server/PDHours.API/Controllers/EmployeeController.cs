@@ -33,13 +33,7 @@ namespace PDHours.API.Controllers
         {
             try
             {
-                _service.Add(new()
-                {
-                    EstimateHours = dto.EstimateHours,
-                    Name = dto.Name,
-                    SquadId = dto.SquadId
-                });
-
+                _service.Create(dto);
                 return Created();
             }
             catch (InvalidOperationException ex)

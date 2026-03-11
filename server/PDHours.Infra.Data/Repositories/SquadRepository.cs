@@ -74,6 +74,7 @@ namespace PDHours.Infra.Data.Repositories
             DateTime? endDateUtcExclusive = DateTime.SpecifyKind(endDate.Date.AddDays(1), DateTimeKind.Utc);
             int totalDays = (endDate.Date - startDate.Date).Days + 1;
 
+            // var necessário para tipo anônimo
             var squadData = await _db.Squads
                 .Where(s => s.Id == id)
                 .Select(s => new

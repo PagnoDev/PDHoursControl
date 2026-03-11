@@ -6,6 +6,7 @@ namespace PDHours.Application.Interfaces.IServices
 {
     public interface IEmployeeService : IBaseService<EmployeeModel> 
     {
+        void Create(CreateEmployeeDTO dto);
         Task<IQueryable<EmployeeListDTO>> GetListView();
     }
 }

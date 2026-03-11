@@ -67,10 +67,8 @@
         placeholder="Digite o nome do usuario"
         [value]="createUserName()"
         (input)="onCreateUserNameInput($event)"
+        [class.input-error]="userNameInvalid()"
       />
-      @if (userNameInvalid()) {
-        <p class="field-error">O nome do usuario e obrigatorio.</p>
-      }
 
       <label for="employee-estimated-hours">Horas estimadas de trabalho</label>
       <input
@@ -79,10 +77,8 @@
         placeholder="Digite a quantidade de horas"
         [value]="createEstimatedHours()"
         (input)="onCreateEstimatedHoursInput($event)"
+        [class.input-error]="estimatedHoursInvalid()"
       />
-      @if (estimatedHoursInvalid()) {
-        <p class="field-error">Horas estimadas deve ser maior que 0.</p>
-      }
 
       <label for="employee-squad-id">Squad</label>
       <div class="input-wrapper">
@@ -91,16 +87,13 @@
           type="number"
           placeholder="Digite o Id da squad"
           [value]="createSquadId()"
-          [class.input-error]="!!squadValidationMessage()"
+          [class.input-error]="squadIdInvalid()"
           (input)="onCreateSquadIdInput($event)"
         />
-        @if (squadValidationMessage()) {
+        @if (squadIdInvalid()) {
           <img class="input-error-icon-svg" src="/assets/icons/error.svg" alt="" aria-hidden="true" />
         }
       </div>
-      @if (squadValidationMessage()) {
-        <p class="field-error">{{ squadValidationMessage() }}</p>
-      }
 
       <div class="modal-actions">
         <button type="button" class="action-btn" (click)="submitCreateEmployee()" [disabled]="createSubmitting()">
